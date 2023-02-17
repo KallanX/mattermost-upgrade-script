@@ -20,22 +20,23 @@ echo -e "Latest Mattermost version: $latestVersion"
 date=$(date +'%F-%H-%M')
 
 # Establish database variables from Mattermost config.json
-DATABASE=$(cat /opt/mattermost/config/config.json | jq --raw-output '.SqlSettings.DriverName')
-DB_USER=$(cat /opt/mattermost/config/config.json | jq --raw-output '.SqlSettings.DataSource' | cut -d: -f2 | tr -d '/')
+DB_TYPE=$(cat /opt/mattermost/config/config.json | jq --raw-output '.SqlSettings.DriverName')
+DB_USER=$(cat /opt/mattermost/config/config.json | jq '.SqlSettings.DataSource' | grep -o '\"[^ \:]*' | tail -c +2 | head -c -3)
 DB_PASS=$(cat /opt/mattermost/config/config.json | jq --raw-output '.SqlSettings.DataSource' | cut -d: -f3 | cut -d@ -f1)
+DB_NAME=$(cat /opt/mattermost/config/config.json | jq '.SqlSettings.DataSource' | grep -o '/.*?' | tail -c +2 | head -c -2)
 
 # Define version function
 function version { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
 # Define database backup function
 function dbbackup () {
-    if [[ $DATABASE == "mysql" ]]; then
+    if [[ $DB_TYPE == "mysql" ]]; then
         echo -e "Database is MySQL. Conducting database backup..."
-        mysqldump -u $DB_USER -p $DB_PASS mattermost > /opt/mattermost-back-$date/database-backup-$date.sql
+        mysqldump -u $DB_USER -p$DB_PASS $DB_NAME > /opt/mattermost-back-$date/database-backup-$date.sql
         echo -e "Database backup complete."
-    elif [[ $DATABASE == "postgres" ]]; then
+    elif [[ $DB_TYPE == "postgres" ]]; then
         echo -e "Database is PostgreSQL. Conducting database backup..."
-        su postgres -c "pg_dump -U $DB_USER mattermost > /var/lib/postgresql/dump/mattermost-back-$date.sql"
+        su postgres -c "pg_dump -U $DB_USER $DB_NAME > /var/lib/postgresql/dump/mattermost-back-$date.sql"
         echo -e "Database backup complete."
     else
         echo -e "Unable to determine database type. A backup will not be conducted."
