@@ -45,7 +45,7 @@ function dbbackup () {
 # Define upgrade function
 function upgrade () {
     if curl -I "https://releases.mattermost.com/$latestVersion/mattermost-$latestVersion-linux-amd64.tar.gz" 2>&1 | grep -q -w "200\|301" ; then
-        echo -e "CURL: Response OKAY! Continuing upgrade...\n"
+        echo -e "CURL: Response OKAY! Continuing upgrade..."
     else
         echo -e "CURL: URL REPORTS DOWN!!! Please check Mattermost version URL and try again. Exiting upgrade..." && exit 1
     fi
