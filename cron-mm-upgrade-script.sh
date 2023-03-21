@@ -6,7 +6,7 @@
 ################################################################################################
 
 # Establsh deployed Mattermost version via mmctl
-deployedVersion=$(/opt/mattermost/bin/mmctl version | grep -w "Version:" | awk '{print $2}' | tr -d 'v')
+deployedVersion=$(/opt/mattermost/bin/mattermost version | grep -w "Version:" | awk '{print $2}' | tr -d 'v')
 
 # Establish latest Mattermost version via GitHub URL
 latestVersion=$(curl -s https://github.com/mattermost/mattermost-server/releases | grep 'mattermost-server/releases/tag' | awk '{print $7}' | cut -d/ -f6 | tr -d '"' | sort -r | uniq | head -1 | tr -d 'v')
@@ -36,6 +36,8 @@ function dbbackup () {
     elif [[ $DATABASE == "postgres" ]]; then
         echo -e "Database is PostgreSQL. Conducting database backup..."
         su postgres -c "pg_dump -U $DB_USER mattermost > /var/lib/postgresql/dump/mattermost-back-$date.sql"
+        echo -e "Removing old PostgreSQL backup..."
+        rm -rf /var/lib/postgresql/dump/$(ls /var/lib/postgresql/dump/ | grep 'mattermost-back' | sort | head -1)
         echo -e "Database backup complete."
     else
         echo -e "Unable to determine database type. A backup will not be conducted."
