@@ -9,7 +9,7 @@
 deployedVersion=$(/opt/mattermost/bin/mattermost version | grep -w "Version:" | awk '{print $2}' | tr -d 'v')
 
 # Establish latest Mattermost version via GitHub URL
-latestVersion=$(curl -s https://github.com/mattermost/mattermost-server/releases | grep 'mattermost-server/releases/tag' | awk '{print $7}' | cut -d/ -f6 | tr -d '"' | sort -r | uniq | head -1 | tr -d 'v')
+latestVersion=$(curl -s https://github.com/mattermost/mattermost-server/releases | grep 'mattermost-server/releases/tag' | awk '{print $7}' | cut -d/ -f6 | tr -d '"' | sort -rV | uniq | head -1 | tr -d 'v')
 
 # Echo out versions for logging
 echo -e "Date/Time:" $(date)
